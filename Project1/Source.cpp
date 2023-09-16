@@ -116,6 +116,7 @@ int main()
             {
                 isMoving = true;
                 r += event.mouseWheel.delta * deltaTime.asMilliseconds() * scaleSpeed;
+                if (r < 1) r = 1;
             }
             if (event.type == sf::Event::KeyReleased)
             {
