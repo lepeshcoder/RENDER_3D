@@ -35,7 +35,7 @@ int main()
     Matrix4x4 ViewPortMatrix = MatrixTranslations::CreateDeviceCoordinates(1920, 1080, 0, 0);
 
     // Полная матрица трансформации
-    Matrix4x4 totalMatrix = (((ViewPortMatrix * ProjectionMatrix) * ViewMatrix) * ModelMatrix);
+    Matrix4x4 totalMatrix = ViewPortMatrix * ProjectionMatrix * ViewMatrix * ModelMatrix;
 
     std::vector<Vector4f> sourceVertexes(data.vertexes.size());
     for (int i = 0; i < sourceVertexes.size(); i++)
@@ -58,11 +58,12 @@ int main()
     sf::Clock clock;
     
     bool isMoving = false;
-    float rotSpeed = 0.1f;
+    float rotSpeed = 0.03f;
     float scaleSpeed = 0.1f;
     float movementSpeed = 0.1f;
     int frameCounter = 0;
     float time = 0;
+    sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
     while (window.isOpen())
     {  
         
@@ -86,40 +87,34 @@ int main()
         {
             if (event.type == sf::Event::Closed)
                 window.close();
-            if (event.type == sf::Event::KeyPressed)
+            if (event.type == sf::Event::MouseButtonPressed)
             {
-              
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+                isMoving = true;
+            }
+            if (event.type == sf::Event::MouseMoved)
+            {
+                if (isMoving)
                 {
-                    isMoving = true;
-                    a += deltaTime.asMilliseconds() * rotSpeed;
+                    sf::Vector2i newMousePosition = sf::Mouse::getPosition(window);
+                    sf::Vector2i delta = mousePosition - newMousePosition;
+                    mousePosition = newMousePosition;
+                    a += delta.y * deltaTime.asMilliseconds() * rotSpeed;
                     if (a > 179.9) a = 179.9;
-                    
-                }
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-                {
-                    isMoving = true;
-                    a -= deltaTime.asMilliseconds() * rotSpeed;
                     if (a < 0.1) a = 0.1;
+                    b += delta.x * deltaTime.asMilliseconds() * rotSpeed;
                 }
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+                else
                 {
-                    isMoving = true;
-                    b += deltaTime.asMilliseconds() * rotSpeed;
-                    if (b > 360) b -= 360;
+                    mousePosition = sf::Mouse::getPosition(window);
                 }
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-                {
-                    isMoving = true;
-                    b -= deltaTime.asMilliseconds() * rotSpeed;
-                    if (b < 0) b += 360;
-                }
-
+            }
+            if (event.type == sf::Event::MouseButtonReleased)
+            {
+                isMoving = false;
             }
             if (event.type == sf::Event::MouseWheelMoved)
             {
                 isMoving = true;
-                std::cout << "MouseWheelDelta: " << event.mouseWheel.delta<<"\n";
                 r += event.mouseWheel.delta * deltaTime.asMilliseconds() * scaleSpeed;
             }
             if (event.type == sf::Event::KeyReleased)
@@ -134,18 +129,12 @@ int main()
             
             std::vector<Vector4f> currVertexes(sourceVertexes);
             
-            sf::Vector3f up;
-            up.x = sin(a * 3.14 / 180);
-            up.y = cos(a * 3.14 / 180);
-            up.z = 0;
     
             sf::Vector3f camera = MatrixTranslations::GetCameraPositionFromSpheric(r, a, b);
-            std::cout << "a: " << a << " b: " << b << "\n";
-            std::cout << "camera: " << camera.x << " : " << camera.y << " : " << camera.z << "\n";
-
+            
             Matrix4x4 newViewMatrix = MatrixTranslations::CreateLookAt(camera, sf::Vector3f(0, 0, 0), sf::Vector3f(0,1,0));
 
-            Matrix4x4 newTotalMatrix = (((ViewPortMatrix * ProjectionMatrix) * newViewMatrix) * ModelMatrix);
+            Matrix4x4 newTotalMatrix = ViewPortMatrix * ProjectionMatrix * newViewMatrix * ModelMatrix;
             
             MatrixTranslations::TransformVertex(currVertexes, newTotalMatrix);
             
