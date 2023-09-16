@@ -54,14 +54,17 @@ Matrix4x4 MatrixTranslations::CreateLookAt(sf::Vector3f cameraPosition, sf::Vect
 	sf::Vector3f cameraUpVector)
 {
 	Matrix4x4* result = new Matrix4x4();
-	sf::Vector3f zAxis(cameraPosition.x - cameraTarget.x,cameraPosition.y - cameraTarget.y,cameraPosition.z - cameraTarget.z);
-	sf::Vector3f zAxisNorm = Vector3fExtensions::Normalize(zAxis);
-	sf::Vector3f xAxis = Vector3fExtensions::crossProduct(cameraUpVector, zAxisNorm);
-	sf::Vector3f xAxisNorm = Vector3fExtensions::Normalize(xAxis);
+	sf::Vector3f zAxis = cameraPosition - cameraTarget;
+	Vector3fExtensions::Normalize(zAxis);
+
+	sf::Vector3f xAxis = Vector3fExtensions::crossProduct(cameraUpVector, zAxis);
+	Vector3fExtensions::Normalize(xAxis);
+
+	sf::Vector3f yAxis = Vector3fExtensions::crossProduct(zAxis, xAxis);
 	
-	result->arr[0][0] = xAxisNorm.x; result->arr[0][1] = xAxisNorm.y; result->arr[0][2] = xAxisNorm.z; result->arr[0][3] = -Vector3fExtensions::scalarProduct(xAxisNorm, cameraPosition);
-	result->arr[1][0] = cameraUpVector.x, result->arr[1][1] = cameraUpVector.y, result->arr[1][2] = cameraUpVector.z; result->arr[1][3] = -Vector3fExtensions::scalarProduct(cameraUpVector, cameraPosition);
-	result->arr[2][0] = zAxisNorm.x; result->arr[2][1] = zAxisNorm.y; result->arr[2][2] = zAxisNorm.z; result->arr[2][3] = -Vector3fExtensions::scalarProduct(zAxisNorm, cameraPosition);
+	result->arr[0][0] = xAxis.x; result->arr[0][1] = xAxis.y; result->arr[0][2] = xAxis.z; result->arr[0][3] = -Vector3fExtensions::scalarProduct(xAxis, cameraPosition);
+	result->arr[1][0] = yAxis.x, result->arr[1][1] = yAxis.y, result->arr[1][2] = yAxis.z; result->arr[1][3] = -Vector3fExtensions::scalarProduct(yAxis, cameraPosition);
+	result->arr[2][0] = zAxis.x; result->arr[2][1] = zAxis.y; result->arr[2][2] = zAxis.z; result->arr[2][3] = -Vector3fExtensions::scalarProduct(zAxis, cameraPosition);
 	result->arr[3][0] = result->arr[3][1] = result->arr[3][2] = 0; result->arr[3][3] = 1;
 
 	return *result;
@@ -131,9 +134,9 @@ Matrix4x4 MatrixTranslations::Kal(sf::Vector3f xAxis, sf::Vector3f yAxis, sf::Ve
 sf::Vector3f MatrixTranslations::GetCameraPositionFromSpheric(float r, float a, float b)
 {
 	sf::Vector3f* camera = new sf::Vector3f();
-	camera->x = r * sin(a * 3.14 / 180) * cos(b * 3.14 / 180);
-	camera->y = r * sin(a * 3.14 / 180) * sin(b * 3.14 / 180);
-	camera->z = r * cos(a * 3.14 / 180);
+	camera->z = r * sin(a * 3.14 / 180) * cos(b * 3.14 / 180);
+	camera->x = r * sin(a * 3.14 / 180) * sin(b * 3.14 / 180);
+	camera->y = r * cos(a * 3.14 / 180);
 	return *camera;
 }
 

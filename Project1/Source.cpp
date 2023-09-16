@@ -13,19 +13,20 @@ int main()
     sf::Image image;
     image.create(1920, 1080,sf::Color::White);
 
-    auto data = ObjReader::ReadFile("C:\\Users\\LepeshCoder\\Desktop\\newSkull.obj"); 
+    auto data = ObjReader::ReadFile("C:\\Users\\LepeshCoder\\Desktop\\OldSchool.obj"); 
 
     float angleX, angleY, angleZ, scale,dx,dy,dz;
     angleX = angleY = angleZ = dx = dy = dz = 0.;
     scale = 2.;
-    float r = 100, a = 0, b = 0;
+    float r = 100, a = 45, b = 0;
 
-    Matrix4x4 ModelMatrix = MatrixTranslations::SetRotationX(angleX * 3.14 / 180) * MatrixTranslations::SetRotationY(angleY * 3.14/180) *
-        MatrixTranslations::SetRotationZ(angleZ *3.14/180) * MatrixTranslations::SetScale(scale, scale, scale);
+    Matrix4x4 ModelMatrix = MatrixTranslations::SetPosition(0,0,0);
 
-    sf::Vector3f sourceCamera(-100, 0, 0);
+    sf::Vector3f sourceCamera = MatrixTranslations::GetCameraPositionFromSpheric(r,a,b);
+    std::cout << sourceCamera.x << " : " << sourceCamera.y << " : " << sourceCamera.z << "\n";
     // Матрица перехода к координатам камеры
     Matrix4x4 ViewMatrix = MatrixTranslations::CreateLookAt(sourceCamera, sf::Vector3f(0, 0, 0), sf::Vector3f(0, 1, 0));
+    ViewMatrix.ViewMatrix();
 
     // Матрица перехода к координатам перспективы
     Matrix4x4 ProjectionMatrix = MatrixTranslations::CreatePerspectiveFieldOfView(45*3.14/180.,1920/1080.,0.1,1000);
@@ -34,7 +35,7 @@ int main()
     Matrix4x4 ViewPortMatrix = MatrixTranslations::CreateDeviceCoordinates(1920, 1080, 0, 0);
 
     // Полная матрица трансформации
-    Matrix4x4 totalMatrix = ViewPortMatrix * ProjectionMatrix * ViewMatrix * ModelMatrix;
+    Matrix4x4 totalMatrix = (((ViewPortMatrix * ProjectionMatrix) * ViewMatrix) * ModelMatrix);
 
     std::vector<Vector4f> sourceVertexes(data.vertexes.size());
     for (int i = 0; i < sourceVertexes.size(); i++)
@@ -57,8 +58,8 @@ int main()
     sf::Clock clock;
     
     bool isMoving = false;
-    float rotSpeed = 0.5f;
-    float scaleSpeed = 0.01f;
+    float rotSpeed = 0.1f;
+    float scaleSpeed = 0.1f;
     float movementSpeed = 0.1f;
     int frameCounter = 0;
     float time = 0;
@@ -87,95 +88,39 @@ int main()
                 window.close();
             if (event.type == sf::Event::KeyPressed)
             {
+              
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
                 {
                     isMoving = true;
-                    angleX += deltaTime.asMilliseconds() * rotSpeed * 3.14 / 180;
-                    /*isMoving = true;
-                    a += deltaTime.asMilliseconds() * rotSpeed;*/
+                    a += deltaTime.asMilliseconds() * rotSpeed;
+                    if (a > 179.9) a = 179.9;
+                    
                 }
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
                 {
                     isMoving = true;
-                    angleX -= deltaTime.asMilliseconds() * rotSpeed * 3.14 / 180;       
-                    /*isMoving = true;
-                    a -= deltaTime.asMilliseconds() * rotSpeed;*/
-                }
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
-                {
-                    isMoving = true;
-                    angleY += deltaTime.asMilliseconds() * rotSpeed * 3.14 / 180;
-                    /*isMoving = true;
-                    b += deltaTime.asMilliseconds() * rotSpeed;*/
-                }
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
-                {
-                    isMoving = true;
-                    angleY -= deltaTime.asMilliseconds() * rotSpeed * 3.14 / 180;
-                    /*isMoving = true;
-                    b -= deltaTime.asMilliseconds() * rotSpeed;*/
-                }
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
-                {
-                    isMoving = true;
-                    angleZ += deltaTime.asMilliseconds() * rotSpeed * 3.14 / 180;
-                   /* isMoving = true;
-                    r += deltaTime.asMilliseconds() * movementSpeed;*/
-                }
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::C))
-                {
-                    isMoving = true;
-                    angleZ -= deltaTime.asMilliseconds() * rotSpeed * 3.14 / 180;
-                    /*isMoving = true;
-                    r -= deltaTime.asMilliseconds() * movementSpeed;*/
+                    a -= deltaTime.asMilliseconds() * rotSpeed;
+                    if (a < 0.1) a = 0.1;
                 }
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
                 {
                     isMoving = true;
-                    scale += deltaTime.asMilliseconds() * scaleSpeed;
-                    if (scale > 5000) scale = 5000;                   
+                    b += deltaTime.asMilliseconds() * rotSpeed;
+                    if (b > 360) b -= 360;
                 }
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
                 {
                     isMoving = true;
-                    scale -= deltaTime.asMilliseconds() * scaleSpeed;
-                    if (scale < 0.001) scale = 0.001;
+                    b -= deltaTime.asMilliseconds() * rotSpeed;
+                    if (b < 0) b += 360;
                 }
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-                {
-                    isMoving = true;
-                    dx += deltaTime.asMilliseconds() * movementSpeed;
-                   
-                }
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-                {
-                    isMoving = true;
-                    dx -= deltaTime.asMilliseconds() * movementSpeed;
-                    
-                }
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-                {
-                    isMoving = true;
-                    dy += deltaTime.asMilliseconds() * movementSpeed;
 
-                }
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-                {
-                    isMoving = true;
-                    dy -= deltaTime.asMilliseconds() * movementSpeed;
-                }
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::N))
-                {
-                    isMoving = true;
-                    dz += deltaTime.asMilliseconds() * movementSpeed;
-
-                }
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::M))
-                {
-                    isMoving = true;
-                    dz -= deltaTime.asMilliseconds() * movementSpeed;
-
-                }
+            }
+            if (event.type == sf::Event::MouseWheelMoved)
+            {
+                isMoving = true;
+                std::cout << "MouseWheelDelta: " << event.mouseWheel.delta<<"\n";
+                r += event.mouseWheel.delta * deltaTime.asMilliseconds() * scaleSpeed;
             }
             if (event.type == sf::Event::KeyReleased)
             {
@@ -186,16 +131,21 @@ int main()
         }
         if (isMoving)
         {
+            
             std::vector<Vector4f> currVertexes(sourceVertexes);
             
-            Matrix4x4 newModelMatrix = MatrixTranslations::SetRotationX(angleX) * MatrixTranslations::SetRotationY(angleY)
-                * MatrixTranslations::SetRotationZ(angleZ) * MatrixTranslations::SetScale(scale, scale, scale);
+            sf::Vector3f up;
+            up.x = sin(a * 3.14 / 180);
+            up.y = cos(a * 3.14 / 180);
+            up.z = 0;
+    
+            sf::Vector3f camera = MatrixTranslations::GetCameraPositionFromSpheric(r, a, b);
+            std::cout << "a: " << a << " b: " << b << "\n";
+            std::cout << "camera: " << camera.x << " : " << camera.y << " : " << camera.z << "\n";
 
-            sf::Vector3f camera = sourceCamera + sf::Vector3f(dx,dy,dz);
+            Matrix4x4 newViewMatrix = MatrixTranslations::CreateLookAt(camera, sf::Vector3f(0, 0, 0), sf::Vector3f(0,1,0));
 
-            Matrix4x4 newViewMatrix = MatrixTranslations::CreateLookAt(camera, sf::Vector3f(0, 0, 0), sf::Vector3f(0, 1, 0));
-
-            Matrix4x4 newTotalMatrix = ViewPortMatrix * ProjectionMatrix * newViewMatrix * newModelMatrix;
+            Matrix4x4 newTotalMatrix = (((ViewPortMatrix * ProjectionMatrix) * newViewMatrix) * ModelMatrix);
             
             MatrixTranslations::TransformVertex(currVertexes, newTotalMatrix);
             

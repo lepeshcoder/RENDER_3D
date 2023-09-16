@@ -13,12 +13,10 @@ sf::Vector3f Vector3fExtensions::crossProduct(sf::Vector3f& left, sf::Vector3f& 
 	return *result;
 }
 
-sf::Vector3f Vector3fExtensions::Normalize(sf::Vector3f& vector)
-{
-	sf::Vector3f* result = new sf::Vector3f();
+void Vector3fExtensions::Normalize(sf::Vector3f& vector)
+{	
 	float length = sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
-	result->x = vector.x / length;
-	result->y = vector.y / length;
-	result->z = vector.z / length;
-	return *result;
+	vector.x /= length;
+	vector.y /= length;
+	vector.z /= length;
 }
