@@ -13,14 +13,16 @@ int main()
     sf::Image image;
     image.create(1920, 1080,sf::Color::White);
 
-    auto data = ObjReader::ReadFile("C:\\Users\\LepeshCoder\\Desktop\\OldSchool.obj"); 
+ 
+
+    auto data = ObjReader::ReadFile("C:\\Users\\LepeshCoder\\Desktop\\Cube.obj"); 
 
     float angleX, angleY, angleZ, scale,dx,dy,dz;
     angleX = angleY = angleZ = dx = dy = dz = 0.;
     scale = 2.;
     float r = 100, a = 45, b = 0;
 
-    Matrix4x4 ModelMatrix = MatrixTranslations::SetPosition(0,0,0);
+    Matrix4x4 ModelMatrix = MatrixTranslations::SetScale(1,1,1);
 
     sf::Vector3f sourceCamera = MatrixTranslations::GetCameraPositionFromSpheric(r,a,b);
     std::cout << sourceCamera.x << " : " << sourceCamera.y << " : " << sourceCamera.z << "\n";
@@ -64,10 +66,10 @@ int main()
     int frameCounter = 0;
     float time = 0;
     sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+    srand(std::time(NULL));
     while (window.isOpen())
     {  
-        
-        sf::Time deltaTime = clock.getElapsedTime();
+        sf::Time deltaTime = clock.getElapsedTime(); 
         clock.restart();
 
         time += deltaTime.asMicroseconds();
@@ -89,7 +91,8 @@ int main()
                 window.close();
             if (event.type == sf::Event::MouseButtonPressed)
             {
-                isMoving = true;
+                if (event.key.code == sf::Mouse::Left)
+                    isMoving = true;
             }
             if (event.type == sf::Event::MouseMoved)
             {
@@ -130,7 +133,6 @@ int main()
             
             std::vector<Vector4f> currVertexes(sourceVertexes);
             
-    
             sf::Vector3f camera = MatrixTranslations::GetCameraPositionFromSpheric(r, a, b);
             
             Matrix4x4 newViewMatrix = MatrixTranslations::CreateLookAt(camera, sf::Vector3f(0, 0, 0), sf::Vector3f(0,1,0));

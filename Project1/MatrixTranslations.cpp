@@ -55,16 +55,16 @@ Matrix4x4 MatrixTranslations::CreateLookAt(sf::Vector3f cameraPosition, sf::Vect
 {
 	Matrix4x4* result = new Matrix4x4();
 	sf::Vector3f zAxis = cameraPosition - cameraTarget;
-	Vector3fExtensions::Normalize(zAxis);
+	Vector3Extensions::Normalize(zAxis);
 
-	sf::Vector3f xAxis = Vector3fExtensions::crossProduct(cameraUpVector, zAxis);
-	Vector3fExtensions::Normalize(xAxis);
+	sf::Vector3f xAxis = Vector3Extensions::crossProduct(cameraUpVector, zAxis);
+	Vector3Extensions::Normalize(xAxis);
 
-	sf::Vector3f yAxis = Vector3fExtensions::crossProduct(zAxis, xAxis);
+	sf::Vector3f yAxis = Vector3Extensions::crossProduct(zAxis, xAxis);
 	
-	result->arr[0][0] = xAxis.x; result->arr[0][1] = xAxis.y; result->arr[0][2] = xAxis.z; result->arr[0][3] = -Vector3fExtensions::scalarProduct(xAxis, cameraPosition);
-	result->arr[1][0] = yAxis.x, result->arr[1][1] = yAxis.y, result->arr[1][2] = yAxis.z; result->arr[1][3] = -Vector3fExtensions::scalarProduct(yAxis, cameraPosition);
-	result->arr[2][0] = zAxis.x; result->arr[2][1] = zAxis.y; result->arr[2][2] = zAxis.z; result->arr[2][3] = -Vector3fExtensions::scalarProduct(zAxis, cameraPosition);
+	result->arr[0][0] = xAxis.x; result->arr[0][1] = xAxis.y; result->arr[0][2] = xAxis.z; result->arr[0][3] = -Vector3Extensions::scalarProduct(xAxis, cameraPosition);
+	result->arr[1][0] = yAxis.x, result->arr[1][1] = yAxis.y, result->arr[1][2] = yAxis.z; result->arr[1][3] = -Vector3Extensions::scalarProduct(yAxis, cameraPosition);
+	result->arr[2][0] = zAxis.x; result->arr[2][1] = zAxis.y; result->arr[2][2] = zAxis.z; result->arr[2][3] = -Vector3Extensions::scalarProduct(zAxis, cameraPosition);
 	result->arr[3][0] = result->arr[3][1] = result->arr[3][2] = 0; result->arr[3][3] = 1;
 
 	return *result;
