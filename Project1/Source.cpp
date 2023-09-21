@@ -13,16 +13,14 @@ int main()
     sf::Image image;
     image.create(1920, 1080,sf::Color::White);
 
- 
-
-    auto data = ObjReader::ReadFile("C:\\Users\\LepeshCoder\\Desktop\\Cube.obj"); 
+    auto data = ObjReader::ReadFile("C:\\Users\\LepeshCoder\\Desktop\\dragon.obj"); 
 
     float angleX, angleY, angleZ, scale,dx,dy,dz;
     angleX = angleY = angleZ = dx = dy = dz = 0.;
-    scale = 2.;
+    scale = 50.;
     float r = 100, a = 45, b = 0;
 
-    Matrix4x4 ModelMatrix = MatrixTranslations::SetScale(1,1,1);
+    Matrix4x4 ModelMatrix = MatrixTranslations::SetScale(scale,scale,scale);
 
     sf::Vector3f sourceCamera = MatrixTranslations::GetCameraPositionFromSpheric(r,a,b);
     std::cout << sourceCamera.x << " : " << sourceCamera.y << " : " << sourceCamera.z << "\n";
@@ -51,7 +49,9 @@ int main()
     // преобразование координат и деление
     MatrixTranslations::TransformVertex(currVertexes, totalMatrix);
 
-    Drawer::DrawModel(data.polygons, currVertexes, image);
+    sf::Vector3f sight(sourceCamera.x, sourceCamera.y, sourceCamera.z);
+
+    Drawer::DrawModel(data.polygons, currVertexes, data.normals, image, sight);
       
     sf::Texture texture;
     texture.loadFromImage(image);
@@ -143,7 +143,7 @@ int main()
             
             image.create(1920, 1080,sf::Color::White);
             
-            Drawer::DrawModel(data.polygons, currVertexes, image);
+            Drawer::DrawModel(data.polygons, currVertexes, data.normals, image, camera);
             
             texture.loadFromImage(image);
             sprite.setTexture(texture);

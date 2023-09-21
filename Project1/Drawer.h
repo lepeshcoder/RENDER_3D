@@ -12,7 +12,7 @@ private:
 public:
 	static void DrawLine(int x1, int y1, int x2, int y2, sf::Image& image);
 
-	static void DrawModel(std::vector<std::vector<sf::Vector3i>>& polygons, std::vector<Vector4f>& vertexes, sf::Image& image);
+	static void DrawModel(std::vector<std::vector<sf::Vector3i>>& polygons, std::vector<Vector4f>& vertexes, std::vector<sf::Vector3f>& normals, sf::Image& image, sf::Vector3f& camera);
 
 	static void SetPixelSecure(sf::Image& image, int x, int y,sf::Color color);
 	
