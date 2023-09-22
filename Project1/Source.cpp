@@ -11,7 +11,7 @@ int main()
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "SFML works!");
     
     sf::Image image;
-    image.create(1920, 1080,sf::Color::White);
+    image.create(1920, 1080,sf::Color::Black);
 
     auto data = ObjReader::ReadFile("C:\\Users\\LepeshCoder\\Desktop\\dragon.obj"); 
 
@@ -19,6 +19,7 @@ int main()
     angleX = angleY = angleZ = dx = dy = dz = 0.;
     scale = 50.;
     float r = 100, a = 45, b = 0;
+    float lightR = r, lightA = a, lightB = b;
 
     Matrix4x4 ModelMatrix = MatrixTranslations::SetScale(scale,scale,scale);
 
@@ -51,7 +52,7 @@ int main()
 
     sf::Vector3f sight(sourceCamera.x, sourceCamera.y, sourceCamera.z);
 
-    Drawer::DrawModel(data.polygons, currVertexes, data.normals, image, sight);
+   // Drawer::DrawModel(data.polygons, currVertexes, data.normals, image, sight);
       
     sf::Texture texture;
     texture.loadFromImage(image);
@@ -65,6 +66,7 @@ int main()
     float movementSpeed = 0.1f;
     int frameCounter = 0;
     float time = 0;
+    float isLightMoving = false;
     sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
     srand(std::time(NULL));
     while (window.isOpen())
@@ -87,12 +89,15 @@ int main()
         sf::Event event;
         while (window.pollEvent(event))
         {
-            if (event.type == sf::Event::Closed)
-                window.close();
+            if (event.type == sf::Event::Closed) window.close();
             if (event.type == sf::Event::MouseButtonPressed)
             {
                 if (event.key.code == sf::Mouse::Left)
                     isMoving = true;
+                if (event.key.code == sf::Keyboard::LShift)
+                {
+                    isLightMoving = true;
+                }
             }
             if (event.type == sf::Event::MouseMoved)
             {
@@ -113,7 +118,7 @@ int main()
             }
             if (event.type == sf::Event::MouseButtonReleased)
             {
-                isMoving = false;
+                    isMoving = false;   
             }
             if (event.type == sf::Event::MouseWheelMoved)
             {
@@ -121,19 +126,21 @@ int main()
                 r += event.mouseWheel.delta * deltaTime.asMilliseconds() * scaleSpeed;
                 if (r < 1) r = 1;
             }
-            if (event.type == sf::Event::KeyReleased)
-            {
-                isMoving = false;
-            }
-
-            
+           
         }
         if (isMoving)
         {
-            
             std::vector<Vector4f> currVertexes(sourceVertexes);
+
+            std::vector<Vector4f> worldVertexes(sourceVertexes);
+
+            Matrix4x4 matrix = ModelMatrix;
+
+            MatrixTranslations::TransformVertex(worldVertexes, matrix);
             
             sf::Vector3f camera = MatrixTranslations::GetCameraPositionFromSpheric(r, a, b);
+
+            sf::Vector3f light = MatrixTranslations::GetCameraPositionFromSpheric(lightR, lightA, lightB);
             
             Matrix4x4 newViewMatrix = MatrixTranslations::CreateLookAt(camera, sf::Vector3f(0, 0, 0), sf::Vector3f(0,1,0));
 
@@ -141,9 +148,9 @@ int main()
             
             MatrixTranslations::TransformVertex(currVertexes, newTotalMatrix);
             
-            image.create(1920, 1080,sf::Color::White);
+            image.create(1920, 1080,sf::Color::Black);
             
-            Drawer::DrawModel(data.polygons, currVertexes, data.normals, image, camera);
+            Drawer::DrawModel(data.polygons, currVertexes, worldVertexes, image, light);
             
             texture.loadFromImage(image);
             sprite.setTexture(texture);
