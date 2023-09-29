@@ -34,7 +34,7 @@ void Drawer::DrawLine(int x1, int y1, int x2, int y2, sf::Image& image)
 }
 
 void Drawer::DrawModel(std::vector<std::vector<sf::Vector3i>>& polygons, std::vector<Vector4f>& deviceVertexes,
-    std::vector<Vector4f>& worldVertexes , sf::Image& image, sf::Vector3f& light)
+    std::vector<Vector4f>& worldVertexes ,  sf::Image& image, sf::Vector3f& light)
 {
     const sf::Vector2u size = image.getSize();
     int drawing = 0;
@@ -89,19 +89,20 @@ void Drawer::DrawModel(std::vector<std::vector<sf::Vector3i>>& polygons, std::ve
 
         sf::Vector3f sight = light - polygonCenter;
         Vector3Extensions::Normalize(sight);
+         
+        double visibility = Vector3Extensions::scalarProduct(normal, sight);
 
-        double light = Vector3Extensions::scalarProduct(normal, sight);
-
-        if (light < 0) continue;
-
-        drawing++;
-
-        sf::Color color(light * 255, light * 255, light * 255);
         
+       
+        if (visibility < 0) continue;
+
+        sf::Color color(visibility * 255, visibility * 255, visibility * 255);
+
         int total_height = points[2].y - points[0].y;
         if (total_height != 0)
         {    
             int segmentUp = points[1].y - points[0].y + 1;
+          
             for (int y = points[0].y; y <= points[1].y; y++) {
                 float alpha = (float)(y - points[0].y) / total_height;
                 float beta = (float)(y - points[0].y) / segmentUp;
@@ -112,7 +113,7 @@ void Drawer::DrawModel(std::vector<std::vector<sf::Vector3i>>& polygons, std::ve
                 if (x2 > (int)size.x) x2 = size.x - 1;
                 for (int x = x1; x <= x2; x++)
                 {
-                    if (y >= 0 && y < size.y )
+                    if (y >= 0 && y < size.y)
                     {
                         double z = Vector3Extensions::FindZ(x, y, fPoints);
                         if (z < zBuffer[y][x])
@@ -120,11 +121,11 @@ void Drawer::DrawModel(std::vector<std::vector<sf::Vector3i>>& polygons, std::ve
                             zBuffer[y][x] = z;
                             image.setPixel(x, y, color);
                         }
-                    }   
-                }                  
+                    }
+                }
             }
-         
             int segmentDown = points[2].y - points[1].y + 1;
+            
             for (int y = points[1].y; y <= points[2].y; y++) {
                 float alpha = (float)(y - points[0].y) / total_height;
                 float beta = (float)(y - points[1].y) / segmentDown;

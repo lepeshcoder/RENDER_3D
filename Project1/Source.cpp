@@ -150,7 +150,7 @@ int main()
             
             image.create(1920, 1080,sf::Color::Black);
             
-            Drawer::DrawModel(data.polygons, currVertexes, worldVertexes, image, light);
+            Drawer::DrawModel(data.polygons, currVertexes, worldVertexes, image, camera);
             
             texture.loadFromImage(image);
             sprite.setTexture(texture);
