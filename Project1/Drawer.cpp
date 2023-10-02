@@ -34,7 +34,7 @@ void Drawer::DrawLine(int x1, int y1, int x2, int y2, sf::Image& image)
 }
 
 void Drawer::DrawModel(std::vector<std::vector<sf::Vector3i>>& polygons, std::vector<Vector4f>& deviceVertexes,
-    std::vector<Vector4f>& worldVertexes ,  sf::Image& image, sf::Vector3f& light)
+    std::vector<Vector4f>& worldVertexes, sf::Image& image, sf::Vector3f& camera, sf::Vector3f& light)
 {
     const sf::Vector2u size = image.getSize();
     int drawing = 0;
@@ -87,16 +87,21 @@ void Drawer::DrawModel(std::vector<std::vector<sf::Vector3i>>& polygons, std::ve
             (worldPoints[0].z + worldPoints[1].z + worldPoints[2].z) / 3.0
         );
 
-        sf::Vector3f sight = light - polygonCenter;
+        sf::Vector3f sight = camera - polygonCenter;
         Vector3Extensions::Normalize(sight);
+
+        sf::Vector3f lightSight =light - polygonCenter;
+        Vector3Extensions::Normalize(lightSight);
          
         double visibility = Vector3Extensions::scalarProduct(normal, sight);
 
-        
-       
+        double lightCos = std::max(0.0,Vector3Extensions::scalarProduct(normal, lightSight));
+      
         if (visibility < 0) continue;
 
-        sf::Color color(visibility * 255, visibility * 255, visibility * 255);
+        drawing++;
+
+        sf::Color color(lightCos * 255, lightCos * 255, lightCos * 255);
 
         int total_height = points[2].y - points[0].y;
         if (total_height != 0)
@@ -148,7 +153,12 @@ void Drawer::DrawModel(std::vector<std::vector<sf::Vector3i>>& polygons, std::ve
                 }
             }
         }
+        
     }
+
+    
+
+    std::cout << "drawing: " << drawing << "\n";
 
     for (int i = 0; i < size.y; i++)
     {

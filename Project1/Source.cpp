@@ -13,7 +13,7 @@ int main()
     sf::Image image;
     image.create(1920, 1080,sf::Color::Black);
 
-    auto data = ObjReader::ReadFile("C:\\Users\\LepeshCoder\\Desktop\\dragon.obj"); 
+    auto data = ObjReader::ReadFile("C:\\Users\\LepeshCoder\\Desktop\\cube.obj"); 
 
     float angleX, angleY, angleZ, scale,dx,dy,dz;
     angleX = angleY = angleZ = dx = dy = dz = 0.;
@@ -30,7 +30,7 @@ int main()
     ViewMatrix.ViewMatrix();
 
     // ћатрица перехода к координатам перспективы
-    Matrix4x4 ProjectionMatrix = MatrixTranslations::CreatePerspectiveFieldOfView(45*3.14/180.,1920/1080.,0.1,1000);
+    Matrix4x4 ProjectionMatrix = MatrixTranslations::CreatePerspectiveFieldOfView(45 * 3.14 / 180., 1920 / 1080., 0.1, 1000);
 
     // ћатрица перехода к координатам устройства
     Matrix4x4 ViewPortMatrix = MatrixTranslations::CreateDeviceCoordinates(1920, 1080, 0, 0);
@@ -67,6 +67,7 @@ int main()
     int frameCounter = 0;
     float time = 0;
     float isLightMoving = false;
+    float lightSpeed = rotSpeed * 3;
     sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
     srand(std::time(NULL));
     while (window.isOpen())
@@ -126,6 +127,41 @@ int main()
                 r += event.mouseWheel.delta * deltaTime.asMilliseconds() * scaleSpeed;
                 if (r < 1) r = 1;
             }
+            if (event.type == sf::Event::KeyPressed)
+            {
+               
+                if (event.key.code == sf::Keyboard::A)
+                {
+                    isMoving = true;
+                    lightB -= deltaTime.asMilliseconds() * lightSpeed;
+                }
+                if (event.key.code == sf::Keyboard::D)
+                {
+                    isMoving = true;
+                    lightB += deltaTime.asMilliseconds() * lightSpeed;
+                }
+                if (event.key.code == sf::Keyboard::W)
+                {
+                    isMoving = true;
+                    lightA += deltaTime.asMilliseconds() * lightSpeed;
+                    if (lightA > 179.9) lightA = 179.9;
+                }
+                if (event.key.code == sf::Keyboard::S)
+                {
+                    isMoving = true;
+                    lightA -= deltaTime.asMilliseconds() * lightSpeed;
+                    if (lightA < 0.1) lightA = 0.1;
+                }
+                if (event.key.code == sf::Keyboard::Space)
+                {
+                    isMoving = true;
+                    lightR = r; lightA = a; lightB = b;
+                }
+            }
+            if (event.type == sf::Event::KeyReleased)
+            {
+                isMoving = false;
+            }
            
         }
         if (isMoving)
@@ -134,9 +170,7 @@ int main()
 
             std::vector<Vector4f> worldVertexes(sourceVertexes);
 
-            Matrix4x4 matrix = ModelMatrix;
-
-            MatrixTranslations::TransformVertex(worldVertexes, matrix);
+            MatrixTranslations::TransformVertex(worldVertexes, ModelMatrix);
             
             sf::Vector3f camera = MatrixTranslations::GetCameraPositionFromSpheric(r, a, b);
 
@@ -150,10 +184,10 @@ int main()
             
             image.create(1920, 1080,sf::Color::Black);
             
-            Drawer::DrawModel(data.polygons, currVertexes, worldVertexes, image, camera);
+            Drawer::DrawModel(data.polygons, currVertexes, worldVertexes, image, camera, light);
             
             texture.loadFromImage(image);
-            sprite.setTexture(texture);
+            sprite.setTexture(texture);             
         }
        
         window.clear();
