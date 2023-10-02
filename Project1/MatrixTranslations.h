@@ -34,6 +34,6 @@ public:
 
 	static sf::Vector3f GetPointNormal(sf::Vector3f& barCoords, sf::Vector3f& normalA, sf::Vector3f& normalB, sf::Vector3f& normalC);
 
-
+	static Matrix4x4 InverseMatrix(Matrix4x4& m);
 };
 

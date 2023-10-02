@@ -56,7 +56,8 @@ ObjData ObjReader::ReadFile(std::string Path)
                     }
                 }
                 currentVertex.push_back(sf::Vector3i(vertex, texture, normal));
-                vertexNormals[vertex - 1] += normals[normal];
+                vertexNormals[vertex - 1] += normals[normal - 1];
+                
             }
             polygons.push_back(currentVertex);
         }
