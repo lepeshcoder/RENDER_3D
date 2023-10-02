@@ -140,4 +140,36 @@ sf::Vector3f MatrixTranslations::GetCameraPositionFromSpheric(float r, float a, 
 	return *camera;
 }
 
+sf::Vector3f MatrixTranslations::GetBarCoords(sf::Vector3f& pointA, sf::Vector3f& pointB, sf::Vector3f& pointC, sf::Vector3f& pointO)
+{
+	sf::Vector3f AO = pointA - pointO;
+	sf::Vector3f BO = pointB - pointO;
+	sf::Vector3f CO = pointC - pointO;
+
+	sf::Vector3f edgeABC1 = pointB - pointA;
+	sf::Vector3f edgeABC2 = pointC - pointA;
+
+	sf::Vector3f crossABC = Vector3Extensions::crossProduct(edgeABC1, edgeABC2);
+	double areaABC = 0.5 * Vector3Extensions::len(crossABC);
+
+	sf::Vector3f crossAOB = Vector3Extensions::crossProduct(AO, BO);
+	double areaAOB = 0.5 * Vector3Extensions::len(crossAOB);
+	
+	sf::Vector3f crossAOC = Vector3Extensions::crossProduct(AO, CO);
+	double areaAOC= 0.5 * Vector3Extensions::len(crossAOC);
+
+	sf::Vector3f crossCOB = Vector3Extensions::crossProduct(CO, BO);
+	double areaCOB = 0.5 * Vector3Extensions::len(crossCOB);
+
+	return sf::Vector3f(areaCOB / areaABC, areaAOC / areaABC, areaAOB / areaABC);
+}
+
+sf::Vector3f MatrixTranslations::GetPointNormal(sf::Vector3f& barCoords, sf::Vector3f& normalA, sf::Vector3f& normalB, sf::Vector3f& normalC)
+{
+	return sf::Vector3f(
+		barCoords.x * normalA.x + barCoords.x * normalB.x + barCoords.x * normalC.x,
+		barCoords.y * normalA.y + barCoords.y * normalB.y + barCoords.y * normalC.y,
+		barCoords.z * normalA.z + barCoords.z * normalB.z + barCoords.z * normalC.z);
+}
+
 

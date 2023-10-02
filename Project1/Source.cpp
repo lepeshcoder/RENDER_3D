@@ -17,7 +17,7 @@ int main()
 
     float angleX, angleY, angleZ, scale,dx,dy,dz;
     angleX = angleY = angleZ = dx = dy = dz = 0.;
-    scale = 50.;
+    scale = 2.;
     float r = 100, a = 45, b = 0;
     float lightR = r, lightA = a, lightB = b;
 
@@ -184,7 +184,7 @@ int main()
             
             image.create(1920, 1080,sf::Color::Black);
             
-            Drawer::DrawModel(data.polygons, currVertexes, worldVertexes, image, camera, light);
+            Drawer::DrawModel(data.polygons, currVertexes, worldVertexes, data.vertexNormals, image, camera, light);
             
             texture.loadFromImage(image);
             sprite.setTexture(texture);             

@@ -12,6 +12,7 @@ ObjData ObjReader::ReadFile(std::string Path)
     std::vector<sf::Vector3f> normals;
     std::vector<sf::Vector3f> textures;
     std::vector<std::vector<sf::Vector3i>> polygons;
+    std::map<int, sf::Vector3f> vertexNormals;
 
     std::string line;
     while (std::getline(file, line)) {
@@ -55,13 +56,14 @@ ObjData ObjReader::ReadFile(std::string Path)
                     }
                 }
                 currentVertex.push_back(sf::Vector3i(vertex, texture, normal));
+                vertexNormals[vertex - 1] += normals[normal];
             }
             polygons.push_back(currentVertex);
         }
     }
 
     file.close();
-    ObjData* data = new ObjData(vertexes, normals, textures, polygons);
+    ObjData* data = new ObjData(vertexes, normals, textures, polygons, vertexNormals);
     return *data;
 }
 
