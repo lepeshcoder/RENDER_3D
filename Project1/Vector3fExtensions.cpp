@@ -62,3 +62,8 @@ double Vector3Extensions::FindZ(float x, float y, sf::Vector3f* points)
 	return (double)(-n.x * x - n.y * y - d) / n.z;
 }
 
+double Vector3Extensions::len(sf::Vector3f v)
+{
+	return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+}
+

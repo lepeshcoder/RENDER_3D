@@ -140,4 +140,88 @@ sf::Vector3f MatrixTranslations::GetCameraPositionFromSpheric(float r, float a, 
 	return *camera;
 }
 
+sf::Vector3f MatrixTranslations::GetBarCoords(sf::Vector3f& pointA, sf::Vector3f& pointB, sf::Vector3f& pointC, sf::Vector3f& pointO)
+{
+	sf::Vector3f AO = pointA - pointO;
+	sf::Vector3f BO = pointB - pointO;
+	sf::Vector3f CO = pointC - pointO;
+
+	sf::Vector3f edgeABC1 = pointB - pointA;
+	sf::Vector3f edgeABC2 = pointC - pointA;
+
+	sf::Vector3f crossABC = Vector3Extensions::crossProduct(edgeABC1, edgeABC2);
+	double areaABC = 0.5 * Vector3Extensions::len(crossABC);
+
+	sf::Vector3f crossAOB = Vector3Extensions::crossProduct(AO, BO);
+	double areaAOB = 0.5 * Vector3Extensions::len(crossAOB); 
+	
+	sf::Vector3f crossAOC = Vector3Extensions::crossProduct(AO, CO);
+	double areaAOC= 0.5 * Vector3Extensions::len(crossAOC);
+
+	sf::Vector3f crossCOB = Vector3Extensions::crossProduct(CO, BO);
+	double areaCOB = 0.5 * Vector3Extensions::len(crossCOB);
+
+	return sf::Vector3f(areaCOB / areaABC, areaAOC / areaABC, areaAOB / areaABC);
+}
+
+sf::Vector3f MatrixTranslations::GetPointNormal(sf::Vector3f& barCoords, sf::Vector3f& normalA, sf::Vector3f& normalB, sf::Vector3f& normalC)
+{
+	return sf::Vector3f(
+		barCoords.x * normalA.x + barCoords.x * normalB.x + barCoords.x * normalC.x,
+		barCoords.y * normalA.y + barCoords.y * normalB.y + barCoords.y * normalC.y,
+		barCoords.z * normalA.z + barCoords.z * normalB.z + barCoords.z * normalC.z);
+}
+
+Matrix4x4 MatrixTranslations::InverseMatrix(Matrix4x4& m)
+{
+	int n = 4;// Размерность матрицы (предполагается, что матрица квадратная)
+
+	// Создаем расширенную матрицу, которая содержит исходную матрицу и единичную матрицу справа
+	std::vector<std::vector<double>> augmentedMatrix(n, std::vector<double>(2 * n, 0.0));
+	for (int i = 0; i < n; ++i) {
+		for (int j = 0; j < n; ++j) {
+			augmentedMatrix[i][j] = m.arr[i][j];
+		}
+		augmentedMatrix[i][i + n] = 1.0;
+	}
+
+	// Прямой ход метода Гаусса-Джордана
+	for (int i = 0; i < n; ++i) {
+		// Делаем главный элемент строки равным 1
+		double pivot = augmentedMatrix[i][i];
+		for (int j = 0; j < 2 * n; ++j) {
+			augmentedMatrix[i][j] /= pivot;
+		}
+
+		// Обнуляем все элементы в столбце, кроме главного элемента
+		for (int k = 0; k < n; ++k) {
+			if (k != i) {
+				double factor = augmentedMatrix[k][i];
+				for (int j = 0; j < 2 * n; ++j) {
+					augmentedMatrix[k][j] -= factor * augmentedMatrix[i][j];
+				}
+			}
+		}
+	}
+
+	// Извлекаем инверсию матрицы из правой части расширенной матрицы
+	std::vector<std::vector<double>> inverse(n, std::vector<double>(n, 0.0));
+	for (int i = 0; i < n; ++i) {
+		for (int j = 0; j < n; ++j) {
+			inverse[i][j] = augmentedMatrix[i][j + n];
+		}
+	}
+
+	Matrix4x4 result;
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			result.arr[i][j] = inverse[i][j];
+		}
+	}
+
+	return result;
+}
+
 

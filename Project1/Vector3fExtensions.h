@@ -22,5 +22,7 @@ public:
 	static sf::Vector3i Multiply(sf::Vector3i& v, float f);
 
 	static double FindZ(float x, float y, sf::Vector3f* points);
+
+	static double len(sf::Vector3f v);
 };
 

@@ -5,7 +5,7 @@
 #include<sstream>
 #include "Matrix4x4.h"
 #include "Vector4f.h"
-
+#include"Vector3fExtensions.h"
 static class ObjReader
 {
 

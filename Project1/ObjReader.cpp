@@ -12,6 +12,7 @@ ObjData ObjReader::ReadFile(std::string Path)
     std::vector<sf::Vector3f> normals;
     std::vector<sf::Vector3f> textures;
     std::vector<std::vector<sf::Vector3i>> polygons;
+    std::map<int, sf::Vector3f> vertexNormals;
 
     std::string line;
     while (std::getline(file, line)) {
@@ -37,7 +38,7 @@ ObjData ObjReader::ReadFile(std::string Path)
         }
         else if (lineType == "f") {
             std::string triplet;
-            std::vector<sf::Vector3i> currentVertex;
+            std::vector<sf::Vector3i> currentPolygon;
             while (iss >> triplet) {
                 std::istringstream tripletStream(triplet);
 
@@ -54,14 +55,31 @@ ObjData ObjReader::ReadFile(std::string Path)
                         tripletStream >> normal;
                     }
                 }
-                currentVertex.push_back(sf::Vector3i(vertex, texture, normal));
+                currentPolygon.push_back(sf::Vector3i(vertex, texture, normal));
+                vertexNormals[vertex - 1] += normals[normal - 1];
+
             }
-            polygons.push_back(currentVertex);
+            polygons.push_back(currentPolygon); 
+            /*sf::Vector3f A(vertexes[currentPolygon[0].x - 1]);
+            sf::Vector3f B(vertexes[currentPolygon[1].x - 1]);
+            sf::Vector3f C(vertexes[currentPolygon[2].x - 1]);
+            sf::Vector3f AB = A - B;
+            sf::Vector3f AC = A - C;
+            sf::Vector3f BC = B - C;
+            Vector3Extensions::Normalize(AB);
+            Vector3Extensions::Normalize(AC);
+            Vector3Extensions::Normalize(BC);
+            double An = Vector3Extensions::scalarProduct(AB, AC);
+            double Bn = Vector3Extensions::scalarProduct(AB, BC);
+            double Cn = Vector3Extensions::scalarProduct(BC, AC);
+            vertexNormals[currentPolygon[0].x - 1] += sf::Vector3f(An * normals[currentPolygon[0].z - 1].x, An * normals[currentPolygon[0].z - 1].y, An * normals[currentPolygon[0].z - 1].z);
+            vertexNormals[currentPolygon[1].x - 1] += sf::Vector3f(Bn * normals[currentPolygon[1].z - 1].x, Bn * normals[currentPolygon[1].z - 1].y, Bn * normals[currentPolygon[1].z - 1].z);
+            vertexNormals[currentPolygon[2].x - 1] += sf::Vector3f(Cn * normals[currentPolygon[2].z - 1].x, Cn * normals[currentPolygon[2].z - 1].y, Cn * normals[currentPolygon[2].z - 1].z);*/
         }
     }
 
     file.close();
-    ObjData* data = new ObjData(vertexes, normals, textures, polygons);
+    ObjData* data = new ObjData(vertexes, normals, textures, polygons, vertexNormals);
     return *data;
 }
 
