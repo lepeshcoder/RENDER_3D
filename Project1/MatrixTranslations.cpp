@@ -153,7 +153,7 @@ sf::Vector3f MatrixTranslations::GetBarCoords(sf::Vector3f& pointA, sf::Vector3f
 	double areaABC = 0.5 * Vector3Extensions::len(crossABC);
 
 	sf::Vector3f crossAOB = Vector3Extensions::crossProduct(AO, BO);
-	double areaAOB = 0.5 * Vector3Extensions::len(crossAOB);
+	double areaAOB = 0.5 * Vector3Extensions::len(crossAOB); 
 	
 	sf::Vector3f crossAOC = Vector3Extensions::crossProduct(AO, CO);
 	double areaAOC= 0.5 * Vector3Extensions::len(crossAOC);

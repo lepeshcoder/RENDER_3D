@@ -15,6 +15,7 @@ public:
 
 	static void DrawModel(std::vector<std::vector<sf::Vector3i>>& polygons, std::vector<Vector4f>& deviceVertexes,
 		std::vector<Vector4f>& worldVertexes, std::map<int, sf::Vector3f>& vertexNormals,
+		std::vector<sf::Vector3f>& normals,
 		sf::Image& image,sf::Vector3f& camera, sf::Vector3f& light,Matrix4x4& inverse);
 
 	static void SetPixelSecure(sf::Image& image, int x, int y,sf::Color color);

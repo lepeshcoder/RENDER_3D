@@ -13,7 +13,12 @@ int main()
     sf::Image image;
     image.create(1920, 1080,sf::Color::Black);
 
-    auto data = ObjReader::ReadFile("C:\\Users\\LepeshCoder\\Desktop\\dragon.obj"); 
+    auto data = ObjReader::ReadFile("C:\\Users\\LepeshCoder\\Desktop\\cube.obj"); 
+
+    for (auto& i : data.vertexNormals)
+    {
+        std::cout << i.second.x << " : " << i.second.y << " : " << i.second.z << "\n";
+    }
 
     float angleX, angleY, angleZ, scale,dx,dy,dz;
     angleX = angleY = angleZ = dx = dy = dz = 0.;
@@ -49,6 +54,7 @@ int main()
     // преобразование координат и деление
     MatrixTranslations::TransformVertex(currVertexes, totalMatrix);
 
+    
     sf::Vector3f sight(sourceCamera.x, sourceCamera.y, sourceCamera.z);
 
    // Drawer::DrawModel(data.polygons, currVertexes, data.normals, image, sight);
@@ -68,7 +74,9 @@ int main()
     float isLightMoving = false;
     float lightSpeed = rotSpeed * 3;
     sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+    
     srand(std::time(NULL));
+
     while (window.isOpen())
     {  
         sf::Time deltaTime = clock.getElapsedTime(); 
@@ -159,7 +167,7 @@ int main()
             
             image.create(1920, 1080,sf::Color::Black);
             
-            Drawer::DrawModel(data.polygons, currVertexes, worldVertexes, data.vertexNormals, image, camera, light,inverse);
+            Drawer::DrawModel(data.polygons, currVertexes, worldVertexes, data.vertexNormals,data.normals, image, camera, light,inverse);
             
             texture.loadFromImage(image);
             sprite.setTexture(texture);             

@@ -34,7 +34,7 @@ void Drawer::DrawLine(int x1, int y1, int x2, int y2, sf::Image& image)
 }
 
 void Drawer::DrawModel(std::vector<std::vector<sf::Vector3i>>& polygons, std::vector<Vector4f>& deviceVertexes,
-    std::vector<Vector4f>& worldVertexes, std::map<int, sf::Vector3f>& vertexNormals,
+    std::vector<Vector4f>& worldVertexes, std::map<int, sf::Vector3f>& vertexNormals, std::vector<sf::Vector3f>& normals,
     sf::Image& image, sf::Vector3f& camera, sf::Vector3f& light, Matrix4x4& inverse)
 {
     const sf::Vector2u size = image.getSize();
@@ -88,7 +88,7 @@ void Drawer::DrawModel(std::vector<std::vector<sf::Vector3i>>& polygons, std::ve
         (
             (worldPoints[0].x + worldPoints[1].x + worldPoints[2].x) / 3.0,
             (worldPoints[0].y + worldPoints[1].y + worldPoints[2].y) / 3.0,
-            (worldPoints[0].z + worldPoints[1].z + worldPoints[2].z) / 3.0
+            (worldPoints[0].z + worldPoints[1].z + worldPoints[2].z) / 3.0          
         );
 
         sf::Vector3f sight = camera - polygonCenter;
