@@ -34,8 +34,8 @@ void Drawer::DrawLine(int x1, int y1, int x2, int y2, sf::Image& image)
 }
 
 void Drawer::DrawModel(std::vector<std::vector<sf::Vector3i>>& polygons, std::vector<Vector4f>& deviceVertexes,
-    std::vector<Vector4f>& worldVertexes, std::map<int, sf::Vector3f>& vertexNormals, std::vector<sf::Vector3f>& normals,
-    sf::Image& image, sf::Vector3f& camera, sf::Vector3f& light, Matrix4x4& inverse)
+    std::vector<Vector4f>& worldVertexes, std::unordered_map<int, sf::Vector3f>& vertexNormals,
+    sf::Image& image, sf::Vector3f& camera, sf::Vector3f& light, Matrix4x4& inverse, std::vector<sf::Vector3f>& normals)
 {
     const sf::Vector2u size = image.getSize();
     int drawing = 0;
@@ -50,29 +50,32 @@ void Drawer::DrawModel(std::vector<std::vector<sf::Vector3i>>& polygons, std::ve
     
     for (int polygon = 0; polygon < polygons.size(); polygon++)
     {
+        int vertexAIndex = polygons[polygon][0].x - 1;
+        int vertexBIndex = polygons[polygon][1].x - 1;
+        int vertexCIndex = polygons[polygon][2].x - 1;
+
         sf::Vector3i iPoints[3]  
         {
-            Vector3Extensions::ToVector3i(deviceVertexes[polygons[polygon][0].x - 1]),
-            Vector3Extensions::ToVector3i(deviceVertexes[polygons[polygon][1].x - 1]),
-            Vector3Extensions::ToVector3i(deviceVertexes[polygons[polygon][2].x - 1])
+            Vector3Extensions::ToVector3i(deviceVertexes[vertexAIndex]),
+            Vector3Extensions::ToVector3i(deviceVertexes[vertexBIndex]),
+            Vector3Extensions::ToVector3i(deviceVertexes[vertexCIndex])
         };
 
         sf::Vector3f fPoints[3]
         {
-            sf::Vector3f(deviceVertexes[polygons[polygon][0].x - 1].x,deviceVertexes[polygons[polygon][0].x - 1].y,deviceVertexes[polygons[polygon][0].x - 1].z),
-            sf::Vector3f(deviceVertexes[polygons[polygon][1].x - 1].x,deviceVertexes[polygons[polygon][1].x - 1].y,deviceVertexes[polygons[polygon][1].x - 1].z),
-            sf::Vector3f(deviceVertexes[polygons[polygon][2].x - 1].x,deviceVertexes[polygons[polygon][2].x - 1].y,deviceVertexes[polygons[polygon][2].x - 1].z)
+            sf::Vector3f(deviceVertexes[vertexAIndex].x,deviceVertexes[vertexAIndex].y,deviceVertexes[vertexAIndex].z),
+            sf::Vector3f(deviceVertexes[vertexBIndex].x,deviceVertexes[vertexBIndex].y,deviceVertexes[vertexBIndex].z),
+            sf::Vector3f(deviceVertexes[vertexCIndex].x,deviceVertexes[vertexCIndex].y,deviceVertexes[vertexCIndex].z)
         };
 
         sf::Vector3f worldPoints[3]
         {
-           sf::Vector3f(worldVertexes[polygons[polygon][0].x - 1].x, worldVertexes[polygons[polygon][0].x - 1].y, worldVertexes[polygons[polygon][0].x - 1].z),
-           sf::Vector3f(worldVertexes[polygons[polygon][1].x - 1].x, worldVertexes[polygons[polygon][1].x - 1].y, worldVertexes[polygons[polygon][1].x - 1].z),
-           sf::Vector3f(worldVertexes[polygons[polygon][2].x - 1].x, worldVertexes[polygons[polygon][2].x - 1].y, worldVertexes[polygons[polygon][2].x - 1].z),
+           sf::Vector3f(worldVertexes[vertexAIndex].x, worldVertexes[vertexAIndex].y, worldVertexes[vertexAIndex].z),
+           sf::Vector3f(worldVertexes[vertexBIndex].x, worldVertexes[vertexBIndex].y, worldVertexes[vertexBIndex].z),
+           sf::Vector3f(worldVertexes[vertexCIndex].x, worldVertexes[vertexCIndex].y, worldVertexes[vertexCIndex].z),
         };
 
-        
-
+      
         if (iPoints[0].y > iPoints[1].y) std::swap(iPoints[0], iPoints[1]);
         if (iPoints[0].y > iPoints[2].y) std::swap(iPoints[0], iPoints[2]);
         if (iPoints[1].y > iPoints[2].y) std::swap(iPoints[1], iPoints[2]);
@@ -104,20 +107,21 @@ void Drawer::DrawModel(std::vector<std::vector<sf::Vector3i>>& polygons, std::ve
         if (total_height != 0)
         {    
             int segmentUp = iPoints[1].y - iPoints[0].y + 1;
-          
+
             for (int y = iPoints[0].y; y <= iPoints[1].y; y++) {
                 float alpha = (float)(y - iPoints[0].y) / total_height;
                 float beta = (float)(y - iPoints[0].y) / segmentUp;
-                int x1 = iPoints[0].x + alpha * (iPoints[2].x - iPoints[0].x);
-                int x2 = iPoints[0].x + beta * (iPoints[1].x - iPoints[0].x);
+                int x1 = round(iPoints[0].x + beta * (iPoints[2].x - iPoints[0].x));
+                int x2 = round(iPoints[0].x + alpha * (iPoints[1].x - iPoints[0].x));
                 if (x1 > x2) std::swap(x1, x2);
                 if (x1 < 0) x1 = 0;    
                 if (x2 > (int)size.x) x2 = size.x - 1;
                 for (int x = x1; x <= x2; x++)
                 {
-                    if (y >= 0 && y < size.y)
+                    if (y >= 0 && y < (int)size.y)
                     {
-                        double z = Vector3Extensions::FindZ(x, y, fPoints);
+                        float phi = x1 == x2 ? 1. : (float)(x - x1) / (float)(x2 - x1);
+                        double z = fPoints[0].z + phi * (fPoints[1].z - fPoints[0].z);
                         if (z < zBuffer[y][x])
                         {
                             sf::Vector3f pointO(x, y, z);
@@ -131,15 +135,22 @@ void Drawer::DrawModel(std::vector<std::vector<sf::Vector3i>>& polygons, std::ve
                             pointOWorld.z /= w;
                             sf::Vector3f pointOF(pointOWorld.x, pointOWorld.y, pointOWorld.z);
 
-                            sf::Vector3f barCoords = MatrixTranslations::GetBarCoords(fPoints[0], fPoints[1], fPoints[2], pointO);
+                            sf::Vector3i pointI(round(pointO.x), round(pointO.y), round(pointO.z));
 
-                            sf::Vector3f normalA = vertexNormals[polygons[polygon][0].x - 1];
+                            sf::Vector3f barCoords = MatrixTranslations::GetBarCoords(iPoints[0], iPoints[1], iPoints[2], pointI);
+                            
+                            if (barCoords.x + barCoords.y + barCoords.z > 1.01)
+                            {
+                                std::cout << "Damn\n"<< barCoords.x + barCoords.y + barCoords.z<<"\n";
+                            }
+
+                            sf::Vector3f normalA = normals[polygons[polygon][0].z - 1]; 
                             Vector3Extensions::Normalize(normalA);
                             
-                            sf::Vector3f normalB = vertexNormals[polygons[polygon][1].x - 1];
+                            sf::Vector3f normalB = normals[polygons[polygon][1].z - 1]; 
                             Vector3Extensions::Normalize(normalB);
 
-                            sf::Vector3f normalC = vertexNormals[polygons[polygon][2].x - 1];
+                            sf::Vector3f normalC = normals[polygons[polygon][2].z - 1]; 
                             Vector3Extensions::Normalize(normalC);
 
                             sf::Vector3f pointNormal = MatrixTranslations::GetPointNormal(barCoords, normalA, normalB, normalC);
@@ -149,7 +160,9 @@ void Drawer::DrawModel(std::vector<std::vector<sf::Vector3i>>& polygons, std::ve
                             Vector3Extensions::Normalize(pointSight);
 
                             double pointLightIntensity = std::max(0.0, Vector3Extensions::scalarProduct(pointNormal, pointSight));
-                            sf::Color color(pointLightIntensity * 255, pointLightIntensity * 255, pointLightIntensity * 255);
+                            if (pointLightIntensity > 1) pointLightIntensity = 1;
+                           // sf::Color color(pointLightIntensity * 255, pointLightIntensity * 255, pointLightIntensity * 255);
+                            sf::Color color(255, 255, 255);
                             
                             image.setPixel(x, y, color);
                             
@@ -164,16 +177,17 @@ void Drawer::DrawModel(std::vector<std::vector<sf::Vector3i>>& polygons, std::ve
             for (int y = iPoints[1].y; y <= iPoints[2].y; y++) {
                 float alpha = (float)(y - iPoints[0].y) / total_height;
                 float beta = (float)(y - iPoints[1].y) / segmentDown;
-                int x1 = iPoints[0].x + alpha * (iPoints[2].x - iPoints[0].x);
-                int x2 = iPoints[1].x + beta * (iPoints[2].x - iPoints[1].x);
+                int x1 = round(iPoints[0].x + alpha * (iPoints[2].x - iPoints[0].x));
+                int x2 = round(iPoints[1].x + beta * (iPoints[2].x - iPoints[1].x));
                 if (x1 > x2) std::swap(x1, x2);
                 if (x1 < 0) x1 = 0;
                 if (x2 > (int)size.x) x2 = size.x - 1;
                 for (int x = x1; x <= x2; x++)
                 {
-                    if (y >= 0 && y < size.y)
+                    if (y >= 0 && y < (int)size.y)
                     {
-                        double z = Vector3Extensions::FindZ(x, y, fPoints);
+                        float phi = x1 == x2 ? 1. : (float)(x - x1) / (float)(x2 - x1);
+                        double z = fPoints[1].z + phi * (fPoints[2].z - fPoints[1].z);
                         if (z < zBuffer[y][x])
                         {
 
@@ -188,15 +202,17 @@ void Drawer::DrawModel(std::vector<std::vector<sf::Vector3i>>& polygons, std::ve
                             pointOWorld.z /= w;
                             sf::Vector3f pointOF(pointOWorld.x, pointOWorld.y, pointOWorld.z);
 
-                            sf::Vector3f barCoords = MatrixTranslations::GetBarCoords(fPoints[0], fPoints[1], fPoints[2], pointO);
+                            sf::Vector3i pointI(round(pointO.x), round(pointO.y), round(pointO.z));
 
-                            sf::Vector3f normalA = vertexNormals[polygons[polygon][0].x - 1];
+                            sf::Vector3f barCoords = MatrixTranslations::GetBarCoords(iPoints[0], iPoints[1], iPoints[2], pointI);
+
+                            sf::Vector3f normalA = normals[polygons[polygon][0].z - 1]; 
                             Vector3Extensions::Normalize(normalA);
 
-                            sf::Vector3f normalB = vertexNormals[polygons[polygon][1].x - 1];
+                            sf::Vector3f normalB = normals[polygons[polygon][1].z - 1]; 
                             Vector3Extensions::Normalize(normalB);
 
-                            sf::Vector3f normalC = vertexNormals[polygons[polygon][2].x - 1];
+                            sf::Vector3f normalC = normals[polygons[polygon][2].z - 1]; 
                             Vector3Extensions::Normalize(normalC);
 
                             sf::Vector3f pointNormal = MatrixTranslations::GetPointNormal(barCoords, normalA, normalB, normalC);
@@ -206,8 +222,8 @@ void Drawer::DrawModel(std::vector<std::vector<sf::Vector3i>>& polygons, std::ve
                             Vector3Extensions::Normalize(pointSight);
 
                             double pointLightIntensity = std::max(0.0, Vector3Extensions::scalarProduct(pointNormal, pointSight));
-                            sf::Color color(pointLightIntensity * 255, pointLightIntensity * 255, pointLightIntensity * 255);
-
+                           // sf::Color color(pointLightIntensity * 255, pointLightIntensity * 255, pointLightIntensity * 255);
+                            sf::Color color(255, 255, 255);
                             image.setPixel(x, y, color);
 
                             zBuffer[y][x] = z;
@@ -218,7 +234,7 @@ void Drawer::DrawModel(std::vector<std::vector<sf::Vector3i>>& polygons, std::ve
         }
         
     }
-    std::cout << "drawing: " << drawing << "\n";
+   // std::cout << "drawing: " << drawing << "\n";
     for (int i = 0; i < size.y; i++)
     {
         delete[] zBuffer[i];

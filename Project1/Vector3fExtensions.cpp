@@ -15,6 +15,7 @@ sf::Vector3f Vector3Extensions::crossProduct(sf::Vector3f& left, sf::Vector3f& r
 	return sf::Vector3f(left.y * right.z - left.z * right.y,
 		left.z * right.x - left.x * right.z,
 		left.x * right.y - left.y * right.x);
+
 }
 
 sf::Vector3f Vector3Extensions::crossProduct(sf::Vector3i& left, sf::Vector3i& right)
@@ -42,7 +43,7 @@ void Vector3Extensions::Normalize(sf::Vector3i& vector)
 
 sf::Vector3i Vector3Extensions::ToVector3i(Vector4f& v)
 {
-	sf::Vector3i result(v.x, v.y, v.z);
+	sf::Vector3i result(round(v.x), round(v.y), round(v.z));
 	return result;
 }
 
