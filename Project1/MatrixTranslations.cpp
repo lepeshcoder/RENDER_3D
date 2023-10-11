@@ -140,28 +140,13 @@ sf::Vector3f MatrixTranslations::GetCameraPositionFromSpheric(float r, float a, 
 	return *camera;
 }
 
-sf::Vector3f MatrixTranslations::GetBarCoords(sf::Vector3f& pointA, sf::Vector3f& pointB, sf::Vector3f& pointC, sf::Vector3f& pointO)
+sf::Vector3f MatrixTranslations::GetBarCoords(sf::Vector3i& pointA, sf::Vector3i& pointB, sf::Vector3i& pointC, sf::Vector3i& pointO)
 {
-	sf::Vector3f AO = pointA - pointO;
-	sf::Vector3f BO = pointB - pointO;
-	sf::Vector3f CO = pointC - pointO;
-
-	sf::Vector3f edgeABC1 = pointB - pointA;
-	sf::Vector3f edgeABC2 = pointC - pointA;
-
-	sf::Vector3f crossABC = Vector3Extensions::crossProduct(edgeABC1, edgeABC2);
-	double areaABC = 0.5 * Vector3Extensions::len(crossABC);
-
-	sf::Vector3f crossAOB = Vector3Extensions::crossProduct(AO, BO);
-	double areaAOB = 0.5 * Vector3Extensions::len(crossAOB); 
-	
-	sf::Vector3f crossAOC = Vector3Extensions::crossProduct(AO, CO);
-	double areaAOC= 0.5 * Vector3Extensions::len(crossAOC);
-
-	sf::Vector3f crossCOB = Vector3Extensions::crossProduct(CO, BO);
-	double areaCOB = 0.5 * Vector3Extensions::len(crossCOB);
-
-	return sf::Vector3f(areaCOB / areaABC, areaAOC / areaABC, areaAOB / areaABC);
+	sf::Vector3f kal1(pointC.x - pointA.x, pointB.x - pointA.x, pointA.x - pointO.x);
+	sf::Vector3f kal2(pointC.y - pointA.y, pointB.y - pointA.y, pointA.y - pointO.y);
+	sf::Vector3f u = Vector3Extensions::crossProduct( kal1,kal2);
+	if (std::abs(u.z) < 1) return sf::Vector3f(-1, 1, 1); // triangle is degenerate, in this case return smth with negative coordinates
+	return sf::Vector3f(1.f - (u.x + u.y) / u.z, u.y / u.z, u.x / u.z);
 }
 
 sf::Vector3f MatrixTranslations::GetPointNormal(sf::Vector3f& barCoords, sf::Vector3f& normalA, sf::Vector3f& normalB, sf::Vector3f& normalC)

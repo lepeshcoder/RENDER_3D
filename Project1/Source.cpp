@@ -15,15 +15,11 @@ int main()
 
     auto data = ObjReader::ReadFile("C:\\Users\\LepeshCoder\\Desktop\\dragon.obj"); 
 
-    for (auto& i : data.vertexNormals)
-    {
-        std::cout << i.second.x << " : " << i.second.y << " : " << i.second.z << "\n";
-    }
 
     float angleX, angleY, angleZ, scale,dx,dy,dz;
     angleX = angleY = angleZ = dx = dy = dz = 0.;
-    scale = 10.;
-    float r = 100, a = 45, b = 0;
+    scale = 30.;
+    float r = 10, a = 45, b = 0;
     float lightR = r, lightA = a, lightB = b;
 
     Matrix4x4 ModelMatrix = MatrixTranslations::SetScale(scale,scale,scale);
@@ -67,7 +63,7 @@ int main()
     
     bool isMoving = false;
     float rotSpeed = 0.03f;
-    float scaleSpeed = 0.1f;
+    float scaleSpeed = 0.01f;
     float movementSpeed = 0.1f;
     int frameCounter = 0;
     float time = 0;
@@ -133,6 +129,7 @@ int main()
                 isMoving = true;
                 r += event.mouseWheel.delta * deltaTime.asMilliseconds() * scaleSpeed;
                 if (r < 1) r = 1;
+                std::cout << "r: " << r << "\n";
             }
             if (event.type == sf::Event::KeyPressed)
             {
@@ -166,8 +163,8 @@ int main()
             MatrixTranslations::TransformVertex(currVertexes, newTotalMatrix);
             
             image.create(1920, 1080,sf::Color::Black);
-            
-            Drawer::DrawModel(data.polygons, currVertexes, worldVertexes, data.vertexNormals,data.normals, image, camera, light,inverse);
+    
+            Drawer::DrawModel(data.polygons, currVertexes, worldVertexes, data.vertexNormals, image, camera, light,inverse, data.normals);
             
             texture.loadFromImage(image);
             sprite.setTexture(texture);             

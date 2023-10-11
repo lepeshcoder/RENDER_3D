@@ -12,7 +12,8 @@ ObjData ObjReader::ReadFile(std::string Path)
     std::vector<sf::Vector3f> normals;
     std::vector<sf::Vector3f> textures;
     std::vector<std::vector<sf::Vector3i>> polygons;
-    std::map<int, sf::Vector3f> vertexNormals;
+    std::unordered_map<int, sf::Vector3f> vertexNormals;
+    
 
     std::string line;
     while (std::getline(file, line)) {
