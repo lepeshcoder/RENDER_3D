@@ -9,10 +9,7 @@
 int main()
 {
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "SFML works!");
-   
-    sf::Image image;
-    image.create(1920, 1080,sf::Color::Black);
-
+  
     auto data = ObjReader::ReadFile("C:\\Users\\LepeshCoder\\Desktop\\dragon.obj"); 
 
 
@@ -52,11 +49,9 @@ int main()
 
     
     sf::Vector3f sight(sourceCamera.x, sourceCamera.y, sourceCamera.z);
-
-   // Drawer::DrawModel(data.polygons, currVertexes, data.normals, image, sight);
       
     sf::Texture texture;
-    texture.loadFromImage(image);
+    texture.create(1920, 1080);
     sf::Sprite sprite(texture);
 
     sf::Clock clock;
@@ -162,11 +157,8 @@ int main()
             
             MatrixTranslations::TransformVertex(currVertexes, newTotalMatrix);
             
-            image.create(1920, 1080,sf::Color::Black);
-    
-            Drawer::DrawModel(data.polygons, currVertexes, worldVertexes, data.vertexNormals, image, camera, light,inverse, data.normals);
+            Drawer::DrawModel(data.polygons, currVertexes, worldVertexes, data.vertexNormals, texture, camera, light,inverse, data.normals);
             
-            texture.loadFromImage(image);
             sprite.setTexture(texture);             
         }
        
