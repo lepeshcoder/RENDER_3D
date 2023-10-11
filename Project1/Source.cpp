@@ -13,7 +13,7 @@ int main()
     sf::Image image;
     image.create(1920, 1080,sf::Color::Black);
 
-    auto data = ObjReader::ReadFile("C:\\Users\\LepeshCoder\\Desktop\\cube.obj"); 
+    auto data = ObjReader::ReadFile("C:\\Users\\LepeshCoder\\Desktop\\dragon.obj"); 
 
     for (auto& i : data.vertexNormals)
     {
