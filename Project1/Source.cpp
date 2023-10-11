@@ -5,12 +5,16 @@
 #include"Matrix4x4.h"
 #include"Vector4f.h"
 #include "MatrixTranslations.h"
+#include "ThreadPool.h"
 
 int main()
 {
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "SFML works!");
   
     auto data = ObjReader::ReadFile("C:\\Users\\LepeshCoder\\Desktop\\dragon.obj"); 
+
+ 
+
 
 
     float angleX, angleY, angleZ, scale,dx,dy,dz;
@@ -65,6 +69,9 @@ int main()
     float isLightMoving = false;
     float lightSpeed = rotSpeed * 3;
     sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+
+    const int numThreads = 16; // Количество потоков в пуле
+    ThreadPool pool(numThreads);
     
     srand(std::time(NULL));
 
@@ -157,7 +164,7 @@ int main()
             
             MatrixTranslations::TransformVertex(currVertexes, newTotalMatrix);
             
-            Drawer::DrawModel(data.polygons, currVertexes, worldVertexes, data.vertexNormals, texture, camera, light,inverse, data.normals);
+            Drawer::DrawModel(data.polygons, currVertexes, worldVertexes, data.vertexNormals, texture, camera, light,inverse, data.normals,pool);
             
             sprite.setTexture(texture);             
         }
