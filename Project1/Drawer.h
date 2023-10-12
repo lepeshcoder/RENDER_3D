@@ -18,6 +18,13 @@ public:
 		std::vector<Vector4f>& worldVertexes, std::unordered_map<int, sf::Vector3f>& vertexNormals,
 		sf::Texture& texture,sf::Vector3f& camera, sf::Vector3f& light,Matrix4x4& inverse, std::vector<sf::Vector3f>& normals,ThreadPool& pool);
 
+    static void DrawLine1(int y, sf::Vector3i* iPoints, sf::Vector3f* fPoints, int total_height, int segmentUp, sf::Vector2u size, double** zBuffer,
+        Matrix4x4& inverse, std::vector<sf::Vector3f>& normals, std::vector<std::vector<sf::Vector3i>>& polygons, 
+        int polygon, sf::Vector3f& light, sf::Uint8* buffer, sf::Vector3f& camera);
+
+    static void DrawLine2(int y, sf::Vector3i* iPoints, sf::Vector3f* fPoints, int total_height, int segmentDown, sf::Vector2u size, double** zBuffer, Matrix4x4& inverse,
+        std::vector<sf::Vector3f>& normals, std::vector<std::vector<sf::Vector3i>>& polygons, int polygon, sf::Vector3f& light, sf::Uint8* buffer, sf::Vector3f& camera);
+
     static void FillPixel(int x1, int x2, int x, int y, sf::Vector3f* fPoints, sf::Vector3i* iPoints, double** zBuffer, Matrix4x4& inverse, std::vector<sf::Vector3f>& normals,
         std::vector<std::vector<sf::Vector3i>>& polygons, int polygon, sf::Vector3f& light, double phi, double z, unsigned char* buffer,
         const sf::Vector2u& size, sf::Vector3f& camera)
@@ -57,19 +64,19 @@ public:
             double pointLightIntensity = std::max(0.0, Vector3Extensions::scalarProduct(pointNormal, pointSight));
 
 
-            double ambientIntensivity = 0.015*5;
+            double ambientIntensivity = 0.2;
             sf::Color ambientColor = sf::Color::Yellow;
             sf::Color ambientComponent(ambientColor.r * ambientIntensivity, ambientColor.g * ambientIntensivity, ambientColor.b * ambientIntensivity);
             
-            double diffuseIntensivity = 0.019*5;
-            sf::Color diffuseColor = sf::Color::Blue;
+            double diffuseIntensivity = 0.5;
+            sf::Color diffuseColor = sf::Color::Yellow;
             double diffuseAngle = pointLightIntensity;
             double diffuseCoeff = diffuseIntensivity * diffuseAngle;
             sf::Color diffuseComponent(diffuseColor.r * diffuseCoeff, diffuseColor.g * diffuseCoeff, diffuseColor.b * diffuseCoeff);
 
-            double specularIntensivity = 0.013*5;
-            sf::Color specularColor = sf::Color::White;
-            double specularCoeff = 1;
+            double specularIntensivity = 0.2;
+            sf::Color specularColor = sf::Color::Yellow;
+            double specularCoeff = 0.5;
             sf::Vector3f L = pointSight;
             sf::Vector3f temp(pointNormal.x * pointLightIntensity * 2, pointNormal.y * pointLightIntensity * 2, pointNormal.z * pointLightIntensity * 2);
             sf::Vector3f R = L - temp;
@@ -80,7 +87,7 @@ public:
             double specularI = pow(mul, specularCoeff) * specularIntensivity;
             sf::Color specularComponent(specularColor.r * specularI, specularColor.g * specularI, specularColor.b * specularI);
 
-            sf::Color generalColor = ambientComponent + diffuseComponent + specularComponent;
+            sf::Color generalColor = ambientComponent + diffuseComponent+ specularComponent;
 
 
             int start = (y * size.x + x) * 4;

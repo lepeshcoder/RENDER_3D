@@ -11,7 +11,7 @@ int main()
 {
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "SFML works!");
   
-    auto data = ObjReader::ReadFile("C:\\Users\\LepeshCoder\\Desktop\\dragon.obj"); 
+    auto data = ObjReader::ReadFile("C:\\Users\\LepeshCoder\\Desktop\\face.obj"); 
 
  
 

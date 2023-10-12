@@ -91,19 +91,9 @@ void Drawer::DrawModel(std::vector<std::vector<sf::Vector3i>>& polygons, std::ve
             int to = (iPoints[1].y >= (int)size.y) ? size.y - 1 : iPoints[1].y;
             
             for (int y = from; y <= to; y++) {
-                float alpha = (float)(y - iPoints[0].y) / total_height;
-                float beta = (float)(y - iPoints[0].y) / segmentUp;
-                int x1 =iPoints[0].x + alpha * (iPoints[2].x - iPoints[0].x);
-                int x2 =iPoints[0].x + beta * (iPoints[1].x - iPoints[0].x);
-                if (x1 > x2) std::swap(x1, x2);
-                if (x1 < 0) x1 = 0;    
-                if (x2 > (int)size.x) x2 = size.x - 1;
-                for (int x = x1; x <= x2; x++)
-                {
-                    float phi = x1 == x2 ? 1. : (float)(x - x1) / (float)(x2 - x1);
-                    double z = fPoints[0].z + phi * (fPoints[1].z - fPoints[0].z);
-                    FillPixel(x1, x2, x, y, fPoints, iPoints, zBuffer, inverse, normals, polygons, polygon, light,phi,z,buffer,size,camera);
-                }
+                pool.enqueue([y, &iPoints, &fPoints, total_height, segmentUp, size, zBuffer, &inverse, &normals, &polygons, polygon, &light, buffer, &camera]() {
+                    DrawLine1(y, iPoints, fPoints, total_height, segmentUp, size, zBuffer, inverse, normals, polygons, polygon, light, buffer, camera);
+                    });
             }
 
             
@@ -114,24 +104,11 @@ void Drawer::DrawModel(std::vector<std::vector<sf::Vector3i>>& polygons, std::ve
             int to1 = (iPoints[2].y >= (int)size.y) ? size.y - 1 : iPoints[2].y;
 
             for (int y = from1; y <= to1; y++) {
-                float alpha = (float)(y - iPoints[0].y) / total_height;
-                float beta = (float)(y - iPoints[1].y) / segmentDown;
-                int x1 = iPoints[0].x + alpha * (iPoints[2].x - iPoints[0].x);
-                int x2 = iPoints[1].x + beta * (iPoints[2].x - iPoints[1].x);
-                if (x1 > x2) std::swap(x1, x2);
-                if (x1 < 0) x1 = 0;
-                if (x2 > (int)size.x) x2 = size.x - 1;
-                for (int x = x1; x <= x2; x++)
-                {
-                    float phi = x1 == x2 ? 1. : (float)(x - x1) / (float)(x2 - x1);
-                    double z = fPoints[1].z + phi * (fPoints[2].z - fPoints[1].z);
-                    FillPixel(x1, x2, x, y, fPoints, iPoints, zBuffer, inverse, normals, polygons, polygon, light, phi, z,buffer,size, camera);
-                }
+                pool.enqueue([y, &iPoints, &fPoints, total_height, segmentDown, size, zBuffer, &inverse, &normals, &polygons, polygon, &light, buffer, &camera]() {
+                    DrawLine2(y, iPoints, fPoints, total_height, segmentDown, size, zBuffer, inverse, normals, polygons, polygon, light, buffer, camera);
+                    });
             }
-        }
-       
-       
-        
+        }       
     }
     texture.update(buffer);
     delete[] buffer;
@@ -141,6 +118,43 @@ void Drawer::DrawModel(std::vector<std::vector<sf::Vector3i>>& polygons, std::ve
         delete[] zBuffer[i];
     }
     delete[] zBuffer;  
+}
+
+void Drawer::DrawLine1(int y, sf::Vector3i* iPoints,sf::Vector3f* fPoints, int total_height, int segmentUp,sf::Vector2u size,double** zBuffer,Matrix4x4& inverse,
+    std::vector<sf::Vector3f>& normals,std::vector<std::vector<sf::Vector3i>>& polygons, int polygon,sf::Vector3f& light,sf::Uint8* buffer,sf::Vector3f& camera )
+{
+    float alpha = (float)(y - iPoints[0].y) / total_height;
+    float beta = (float)(y - iPoints[0].y) / segmentUp;
+    int x1 = iPoints[0].x + alpha * (iPoints[2].x - iPoints[0].x);
+    int x2 = iPoints[0].x + beta * (iPoints[1].x - iPoints[0].x);
+    if (x1 > x2) std::swap(x1, x2);
+    if (x1 < 0) x1 = 0;
+    if (x2 > (int)size.x) x2 = size.x - 1;
+    for (int x = x1; x <= x2; x++)
+    {
+        float phi = x1 == x2 ? 1. : (float)(x - x1) / (float)(x2 - x1);
+        double z = fPoints[0].z + phi * (fPoints[1].z - fPoints[0].z);
+        FillPixel(x1, x2, x, y, fPoints, iPoints, zBuffer, inverse, normals, polygons, polygon, light, phi, z, buffer, size, camera);
+    }
+}
+
+void Drawer::DrawLine2(int y, sf::Vector3i* iPoints, sf::Vector3f* fPoints, int total_height, int segmentDown, sf::Vector2u size, double** zBuffer,
+    Matrix4x4& inverse, std::vector<sf::Vector3f>& normals, std::vector<std::vector<sf::Vector3i>>& polygons, int polygon,
+    sf::Vector3f& light, sf::Uint8* buffer, sf::Vector3f& camera)
+{
+    float alpha = (float)(y - iPoints[0].y) / total_height;
+    float beta = (float)(y - iPoints[1].y) / segmentDown;
+    int x1 = iPoints[0].x + alpha * (iPoints[2].x - iPoints[0].x);
+    int x2 = iPoints[1].x + beta * (iPoints[2].x - iPoints[1].x);
+    if (x1 > x2) std::swap(x1, x2);
+    if (x1 < 0) x1 = 0;
+    if (x2 > (int)size.x) x2 = size.x - 1;
+    for (int x = x1; x <= x2; x++)
+    {
+        float phi = x1 == x2 ? 1. : (float)(x - x1) / (float)(x2 - x1);
+        double z = fPoints[1].z + phi * (fPoints[2].z - fPoints[1].z);
+        FillPixel(x1, x2, x, y, fPoints, iPoints, zBuffer, inverse, normals, polygons, polygon, light, phi, z, buffer, size, camera);
+    }
 }
 
 void Drawer::swap(int& a, int& b)
