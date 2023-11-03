@@ -140,7 +140,6 @@ void Drawer::DrawModel(std::vector<std::vector<sf::Vector3i>>& polygons, std::ve
     {
         delete[] zBuffer[i];
     }
-    delete[] zBuffer;  
 }
 
 void Drawer::swap(int& a, int& b)
