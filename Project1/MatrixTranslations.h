@@ -30,7 +30,7 @@ public:
 
 	static sf::Vector3f GetCameraPositionFromSpheric(float r, float a, float b);
 
-	static sf::Vector3f GetBarCoords(sf::Vector3i& pointA, sf::Vector3i& pointB, sf::Vector3i& pointC, sf::Vector3i& pointO);
+	static sf::Vector3f GetBarCoords(sf::Vector3f& pointA, sf::Vector3f& pointB, sf::Vector3f& pointC, sf::Vector3f& pointO);
 
 	static sf::Vector3f GetPointNormal(sf::Vector3f& barCoords, sf::Vector3f& normalA, sf::Vector3f& normalB, sf::Vector3f& normalC);
 

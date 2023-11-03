@@ -102,7 +102,7 @@ void Drawer::DrawModel(std::vector<std::vector<sf::Vector3i>>& polygons, std::ve
                 {
                     float phi = x1 == x2 ? 1. : (float)(x - x1) / (float)(x2 - x1);
                     double z = fPoints[0].z + phi * (fPoints[1].z - fPoints[0].z);
-                    FillPixel(x1, x2, x, y, fPoints, iPoints, zBuffer, inverse, normals, polygons, polygon, light,phi,z,buffer,size,camera);
+                    FillPixel(x1, x2, x, y, fPoints, zBuffer, inverse, normals, polygons, polygon, light,phi,z,buffer,size,camera);
                 }
             }
 
@@ -125,7 +125,7 @@ void Drawer::DrawModel(std::vector<std::vector<sf::Vector3i>>& polygons, std::ve
                 {
                     float phi = x1 == x2 ? 1. : (float)(x - x1) / (float)(x2 - x1);
                     double z = fPoints[1].z + phi * (fPoints[2].z - fPoints[1].z);
-                    FillPixel(x1, x2, x, y, fPoints, iPoints, zBuffer, inverse, normals, polygons, polygon, light, phi, z,buffer,size, camera);
+                    FillPixel(x1, x2, x, y, fPoints, zBuffer, inverse, normals, polygons, polygon, light, phi, z,buffer,size, camera);
                 }
             }
         }
